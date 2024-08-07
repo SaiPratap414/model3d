@@ -32,7 +32,7 @@ public class MainHandler : MonoBehaviour
         if(_OpenAiApi == null) _OpenAiApi = GetComponent<OpenAiApi>();
         if (_ElevenLabsTTS == null) _ElevenLabsTTS = GetComponent<ElevenLabsTTS>();
         if(_OpenAIAssistant == null) _OpenAIAssistant = GetComponent<OpenAIAssistant>();
-        is2D = true;
+        is2D = false;
     }
 
 

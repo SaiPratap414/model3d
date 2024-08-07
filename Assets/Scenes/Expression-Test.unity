@@ -42993,7 +42993,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 60674bfed9f0507448803c85a18bb4a4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  apiKey: sk-proj-5lLRxQVeEW7B7Hn3s13vT3BlbkFJ3fUPAUjSsJIVhphtkstg
+  apiKey: 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
   aIResponse:
     id: 
     _object: 
@@ -43044,7 +43044,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bc82328c48904c64680cb8158de93e82, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  OpenAiApi: sk-proj-5lLRxQVeEW7B7Hn3s13vT3BlbkFJ3fUPAUjSsJIVhphtkstg
+  OpenAiApi: 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
   AiThread:
     id: 
     object: 

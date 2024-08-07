@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
 
-
 [Serializable]
 public class OpenAIPayload
 {
@@ -55,8 +54,7 @@ public class UserResponse
     public string Response;
 }
 
-
-public class OpenAiApi : MonoBehaviour  
+public class OpenAiApi : MonoBehaviour
 {
     public string apiKey;
     private string url = "https://api.openai.com/v1/chat/completions";
@@ -65,7 +63,6 @@ public class OpenAiApi : MonoBehaviour
     public UserResponse myResponse;
 
     public string CustomCharacteristics = "";
-
 
     private void Start()
     {
@@ -112,7 +109,7 @@ public class OpenAiApi : MonoBehaviour
                 aIResponse = JsonUtility.FromJson<OpenAIResponse>(webRequest.downloadHandler.text);
 
                 myResponse = JsonUtility.FromJson<UserResponse>(aIResponse.choices[0].message.content);
-                Debug.LogWarning("Expression: " +  myResponse.Expression + "\n Content: " + myResponse.Response);
+                Debug.LogWarning("Expression: " + myResponse.Expression + "\n Content: " + myResponse.Response);
                 return myResponse;
             }
         }
