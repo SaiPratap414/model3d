@@ -21,7 +21,7 @@ public class ElevenLabsTTS : MonoBehaviour
 
     private void Awake()
     {
-        mainHandler = GetComponent<Mainhandler>();
+        mainHandler = GetComponent<MainHandler>();
     }
 
     IEnumerator DestroyAudioFile(AudioClip audioClip, float time)
