@@ -8,7 +8,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Expression-Test.unity
     guid: 698590129de856d418d4ae728a65273e
-  - enabled: 0
+  - enabled: 1
     path: Assets/uLipSync/Samples/12. WebGL/12-1. WebGL x AudioClip.unity
     guid: facea827637364a67b14147495e961f3
   m_configObjects: {}

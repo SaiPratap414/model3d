@@ -72,7 +72,7 @@ public class OpenAiApi : MonoBehaviour
     {
         OpenAIPayload payload = new OpenAIPayload
         {
-            model = "gpt-3.5-turbo",
+            model = "gpt-4o-mini",
             messages = new List<Message>
             {
                 new Message{ role = "system", content = "You are conversational Bot "+ CustomCharacteristics.Trim() +" ,The response should only be in JSON format which consits of two objects first is Expression(which should be selected depending on the response from only this list [Happy,Sad,Surprised,Angry,Confused]) and second Response of Bot (keep the response Short in lenght)" },

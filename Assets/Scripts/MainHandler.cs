@@ -47,7 +47,7 @@ public class MainHandler : MonoBehaviour
 
         ChatBoxManager.instance.SendMessageToChat(input,ChatBy.User);
 
-        UserResponse GivenResponse = await _OpenAIAssistant.AssistantRequest(input);
+        UserResponse GivenResponse = await _OpenAiApi.SendOpenAIRequest(input);
         if (GivenResponse == null)
         {
             Debug.LogError("Failed to get a response.");
