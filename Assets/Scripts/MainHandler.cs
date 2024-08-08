@@ -55,7 +55,7 @@ public class MainHandler : MonoBehaviour
             return;
         }
 
-        if (Enum.TryParse<Expressions>(GivenResponse.Expression, out Expressions _expression))
+        if (Enum.TryParse<Expressions>(GivenResponse.Expression, out Expressions _expression) && is2D)
         {
             Debug.Log("Parsed Succusfully " + _expression);
             CubismExpression.instance.ChangeExpression(_expression);

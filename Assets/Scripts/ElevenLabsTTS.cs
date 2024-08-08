@@ -32,7 +32,7 @@ public class ElevenLabsTTS : MonoBehaviour
 #endif
         Destroy(audioClip);
     }
-    
+
     public async Task GetTextToSpeech(string textToConvert)
     {
         if (string.IsNullOrWhiteSpace(textToConvert))
@@ -53,7 +53,7 @@ public class ElevenLabsTTS : MonoBehaviour
 
             UnityWebRequestAsyncOperation operation = request.SendWebRequest();
 
-            while(!operation.isDone)
+            while (!operation.isDone)
             {
                 await Task.Yield();
             }
@@ -83,19 +83,19 @@ public class ElevenLabsTTS : MonoBehaviour
                     audioSource.clip = audioClip;
                     audioSource.Play();
                 }
-                else 
+                else
                 {
                     audioSource_3d.clip = audioClip;
                     audioSource_3d.Play();
                 }
-                
+
                 ChatBoxManager.instance.SendMessageToChat(textToConvert, ChatBy.Bot);
 
                 // Fucking avoiding memory leak still should test...... Might replace with a saneObj rather than creating new one
                 Debug.Log("AudioClipLength: " + audioClip.length);
                 Debug.Log("Plus 1 " + (audioClip.length + 1));
                 //Destroy(audioClip, audioClip.length + 1);
-                StartCoroutine(DestroyAudioFile(audioClip,audioClip.length + 1));
+                StartCoroutine(DestroyAudioFile(audioClip, audioClip.length + 1));
             }
         }
     }
