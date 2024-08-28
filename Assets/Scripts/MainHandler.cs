@@ -2,25 +2,24 @@ using System;
 using System.Runtime.InteropServices;
 using TMPro;
 using UnityEngine;
-using static UnityEngine.GraphicsBuffer;
+using System.Collections;
 
 public class MainHandler : MonoBehaviour
 {
-    [Header("Camers")]
+    [Header("Cameras")]
     [SerializeField] GameObject Camera2d;
     [SerializeField] GameObject Camera3d;
-    [Header("Charaters")]
-    [SerializeField] GameObject Charater2d;
-    [SerializeField] GameObject Charater3d;
+    [Header("Characters")]
+    [SerializeField] GameObject Character2d;
+    [SerializeField] GameObject Character3d;
     public bool is2D = true;
-    
-    [Header("")]
-    [SerializeField] OpenAiApi _OpenAiApi;
-    [SerializeField] OpenAIAssistant _OpenAIAssistant;
-    [SerializeField] ElevenLabsTTS _ElevenLabsTTS;
 
+    [Header("")]
+    [SerializeField] AnthropicAPIClient _AnthropicAPIClient;
+    [SerializeField] ElevenLabsTTS _ElevenLabsTTS;
     [SerializeField] TMP_InputField Settings_Input;
     [SerializeField] TMP_Text Settings_SubHeader;
+    [SerializeField] AudioSource audioSource;
 
     [DllImport("__Internal")]
     private static extern bool CloseSampling(string name);
@@ -29,72 +28,87 @@ public class MainHandler : MonoBehaviour
 
     void Start()
     {
-        if(_OpenAiApi == null) _OpenAiApi = GetComponent<OpenAiApi>();
+        if (_AnthropicAPIClient == null) _AnthropicAPIClient = GetComponent<AnthropicAPIClient>();
         if (_ElevenLabsTTS == null) _ElevenLabsTTS = GetComponent<ElevenLabsTTS>();
-        if(_OpenAIAssistant == null) _OpenAIAssistant = GetComponent<OpenAIAssistant>();
-        
+        if (audioSource == null) audioSource = GetComponent<AudioSource>();
     }
 
-
-    public async void TakeInputFromUser(string input)
+    public void TakeInputFromUser(string input)
     {
+        if (string.IsNullOrWhiteSpace(input) || !isFree)
+        {
+            return;
+        }
+
         isFree = false;
-        if (string.IsNullOrWhiteSpace(input))
+        ChatBoxManager.instance.SendMessageToChat(input, ChatBy.User);
+
+        _AnthropicAPIClient.SendMessage(
+            input,
+            onComplete: (claudeResponse) => ProcessClaudeResponse(claudeResponse),
+            onError: (errorMessage) =>
+            {
+                Debug.LogError($"Failed to get a response from Claude: {errorMessage}");
+                isFree = true;
+            }
+        );
+    }
+
+    private void ProcessClaudeResponse(ResponseClaude claudeResponse)
+    {
+        if (claudeResponse.content == null || claudeResponse.content.Count == 0)
         {
+            Debug.LogError("Claude response content is empty.");
             isFree = true;
             return;
         }
 
-        ChatBoxManager.instance.SendMessageToChat(input,ChatBy.User);
+        string responseText = claudeResponse.content[0].text;
 
-        UserResponse GivenResponse = await _OpenAiApi.SendOpenAIRequest(input);
-        if (GivenResponse == null)
-        {
-            Debug.LogError("Failed to get a response.");
-            isFree = true;
-            return;
-        }
+        // TODO: Implement expression parsing for Claude's response
+        // For now, we'll skip the expression parsing part
 
-        if (Enum.TryParse<Expressions>(GivenResponse.Expression, out Expressions _expression) && is2D)
-        {
-            Debug.Log("Parsed Succusfully " + _expression);
-            CubismExpression.instance.ChangeExpression(_expression);
-        }
         Debug.Log("Sending to Voice");
-        await _ElevenLabsTTS.GetTextToSpeech(GivenResponse.Response);
-
-        Debug.Log("Done Func");
-        isFree = true;
-
-        
+        _ElevenLabsTTS.GetTextToSpeech(
+            responseText,
+            onComplete: (audioClip) =>
+            {
+                audioSource.clip = audioClip;
+                audioSource.Play();
+                Debug.Log("Done Func");
+                isFree = true;
+            },
+            onError: (errorMessage) =>
+            {
+                Debug.LogError($"Text-to-speech error: {errorMessage}");
+                isFree = true;
+            }
+        );
     }
 
     public void SetCustomProperties()
     {
-        _OpenAiApi.CustomCharacteristics = Settings_Input.text;
+        // TODO: Implement custom properties for Claude if needed
         Settings_SubHeader.text = "Done";
     }
 
-    
-    public void SwitchCharaters()
+    public void SwitchCharacters()
     {
         if (is2D)
         {
-            Charater2d.gameObject.SetActive(false);
+            Character2d.gameObject.SetActive(false);
             Camera2d.gameObject.SetActive(false);
             Camera3d.gameObject.SetActive(true);
-            Charater3d.gameObject.SetActive(true);
+            Character3d.gameObject.SetActive(true);
             is2D = false;
         }
-        else 
+        else
         {
-            Charater2d.gameObject.SetActive(true);
+            Character2d.gameObject.SetActive(true);
             Camera2d.gameObject.SetActive(true);
             Camera3d.gameObject.SetActive(false);
-            Charater3d.gameObject.SetActive(false);
+            Character3d.gameObject.SetActive(false);
             is2D = true;
         }
     }
-
-
 }

@@ -1,101 +1,54 @@
-using System.Collections;
-using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 using UnityEngine;
+using System.Collections;
 using UnityEngine.Networking;
+using System;
+using System.Text;
 
 public class ElevenLabsTTS : MonoBehaviour
 {
-    [SerializeField] MainHandler mainHandler;
-    [SerializeField] AudioSource audioSource;
-    [SerializeField] AudioSource audioSource_3d;
+    [SerializeField] private string apiKey;
+    [SerializeField] private string voiceId;
+    private const string API_URL = "https://api.elevenlabs.io/v1/text-to-speech/";
 
-    private const string url = "https://api.elevenlabs.io/v1/text-to-speech/9mKHRoYKB5GLFj04MY0i";
-    private const string apiKey = "d2c1e4ce6ac029710adcf80484f60dcb";
-    public string model_id = "eleven_monolingual_v1";
-    public float stability = 0.5f;
-    public float similarity_boost = 0.5f;
-
-    [DllImport("__Internal")]
-    private static extern bool CloseSampling(string name);
-
-    private void Awake()
+    public void GetTextToSpeech(string text, Action<AudioClip> onComplete, Action<string> onError)
     {
-        mainHandler = GetComponent<MainHandler>();
+        StartCoroutine(GetTextToSpeechCoroutine(text, onComplete, onError));
     }
 
-    IEnumerator DestroyAudioFile(AudioClip audioClip, float time)
+    private IEnumerator GetTextToSpeechCoroutine(string text, Action<AudioClip> onComplete, Action<string> onError)
     {
-        yield return new WaitForSeconds(time);
-#if UNITY_WEBGL && !UNITY_EDITOR
-        CloseSampling(audioClip.name);
-#endif
-        Destroy(audioClip);
-    }
+        string url = API_URL + voiceId;
 
-    public async Task GetTextToSpeech(string textToConvert)
-    {
-        if (string.IsNullOrWhiteSpace(textToConvert))
+        WWWForm form = new WWWForm();
+        form.AddField("text", text);
+
+        using (UnityWebRequest www = UnityWebRequest.Post(url, form))
         {
-            Debug.LogError("Text Is Empty");
-            return;
-        }
+            www.SetRequestHeader("Authorization", "Bearer " + apiKey);
+            www.SetRequestHeader("Content-Type", "application/json");
 
-        string jsonData = "{\"text\": \"" + textToConvert + "\", \"model_id\": \"eleven_monolingual_v1\", \"voice_settings\": {\"stability\": 0.5, \"similarity_boost\": 0.5}}";
+            string jsonBody = JsonUtility.ToJson(new { text = text });
+            byte[] bodyRaw = Encoding.UTF8.GetBytes(jsonBody);
+            www.uploadHandler = new UploadHandlerRaw(bodyRaw);
+            www.downloadHandler = new DownloadHandlerAudioClip(url, AudioType.MPEG);
 
-        using (UnityWebRequest request = new UnityWebRequest(url, "POST"))
-        {
-            byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(jsonData);
-            request.uploadHandler = new UploadHandlerRaw(bodyRaw);
-            request.downloadHandler = new DownloadHandlerAudioClip(url, AudioType.MPEG);
-            request.SetRequestHeader("Content-Type", "application/json");
-            request.SetRequestHeader("xi-api-key", apiKey);
+            yield return www.SendWebRequest();
 
-            UnityWebRequestAsyncOperation operation = request.SendWebRequest();
-
-            while (!operation.isDone)
+            if (www.result != UnityWebRequest.Result.Success)
             {
-                await Task.Yield();
-            }
-
-            if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
-            {
-                Debug.LogError(request.error);
+                onError?.Invoke($"Error: {www.error}");
             }
             else
             {
-                Debug.Log("Response received. Status code: " + request.responseCode);
-                AudioClip audioClip = DownloadHandlerAudioClip.GetContent(request);
-                audioClip.name = Random.Range(500, 500000).ToString();
-                if (audioClip == null)
+                AudioClip clip = DownloadHandlerAudioClip.GetContent(www);
+                if (clip != null)
                 {
-                    Debug.LogError("Failed to load audio clip.");
-                    return;
-                }
-                while (!audioClip.loadState.Equals(AudioDataLoadState.Loaded))
-                {
-                    Debug.Log("is Loading : " + audioClip.loadState);
-                    await Task.Yield();
-                }
-                audioClip.LoadAudioData();
-                if (mainHandler.is2D)
-                {
-                    audioSource.clip = audioClip;
-                    audioSource.Play();
+                    onComplete?.Invoke(clip);
                 }
                 else
                 {
-                    audioSource_3d.clip = audioClip;
-                    audioSource_3d.Play();
+                    onError?.Invoke("Failed to generate audio clip");
                 }
-
-                ChatBoxManager.instance.SendMessageToChat(textToConvert, ChatBy.Bot);
-
-                // Fucking avoiding memory leak still should test...... Might replace with a saneObj rather than creating new one
-                Debug.Log("AudioClipLength: " + audioClip.length);
-                Debug.Log("Plus 1 " + (audioClip.length + 1));
-                //Destroy(audioClip, audioClip.length + 1);
-                StartCoroutine(DestroyAudioFile(audioClip, audioClip.length + 1));
             }
         }
     }

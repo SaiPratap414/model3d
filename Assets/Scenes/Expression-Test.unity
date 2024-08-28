@@ -43492,8 +43492,6 @@ GameObject:
   - component: {fileID: 1406045415}
   - component: {fileID: 1406045416}
   - component: {fileID: 1406045417}
-  - component: {fileID: 1406045418}
-  - component: {fileID: 1406045420}
   - component: {fileID: 1406045419}
   - component: {fileID: 1406045421}
   - component: {fileID: 1406045422}
@@ -43648,40 +43646,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7ceb9a4a0082e044c99b543925c8f6e8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mainHandler: {fileID: 0}
-  audioSource: {fileID: 1406045416}
-  audioSource_3d: {fileID: 730131991}
-  model_id: eleven_monolingual_v1
-  stability: 0.5
-  similarity_boost: 0.55
---- !u!114 &1406045418
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1406045413}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 60674bfed9f0507448803c85a18bb4a4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  apiKey: 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
-  aIResponse:
-    id: 
-    _object: 
-    created: 0
-    model: 
-    system_fingerprint: 
-    choices: []
-    usage:
-      prompt_tokens: 0
-      completion_tokens: 0
-      total_tokens: 0
-  myResponse:
-    Expression: 
-    Response: 
-  CustomCharacteristics: 
+  apiKey: 
+  voiceId: 
 --- !u!114 &1406045419
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -43696,41 +43662,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Camera2d: {fileID: 1385971524}
   Camera3d: {fileID: 864014450}
-  Charater2d: {fileID: 1245291813}
-  Charater3d: {fileID: 730131990}
+  Character2d: {fileID: 0}
+  Character3d: {fileID: 0}
   is2D: 1
-  _OpenAiApi: {fileID: 1406045418}
-  _OpenAIAssistant: {fileID: 1406045420}
+  _AnthropicAPIClient: {fileID: 0}
   _ElevenLabsTTS: {fileID: 1406045417}
   Settings_Input: {fileID: 2143249480}
   Settings_SubHeader: {fileID: 112129400}
+  audioSource: {fileID: 0}
   isFree: 1
---- !u!114 &1406045420
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1406045413}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bc82328c48904c64680cb8158de93e82, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  OpenAiApi: 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
-  AiThread:
-    id: 
-    object: 
-    created_at: 0
-  messageList:
-    first_id: 
-    last_id: 
-    has_more: 0
-    data: []
-  UResponse:
-    Expression: 
-    Response: 
-  Message: 
 --- !u!114 &1406045421
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.Networking;
-using System.Threading.Tasks;
+using System.Collections;
+using System.Collections.Generic;
 using System.Text;
 using System;
 
@@ -12,7 +13,7 @@ public class Content
 }
 
 [System.Serializable]
-public class ResposneClaude
+public class ResponseClaude
 {
     public List<Content> content;
     public string id;
@@ -31,23 +32,19 @@ public class Usage
     public int output_tokens;
 }
 
-
 public class AnthropicAPIClient : MonoBehaviour
 {
     private const string API_URL = "https://api.anthropic.com/v1/messages";
     private const string API_VERSION = "2023-06-01";
-    private const string MODEL = "claude-3-5-sonnet-20240624";
-
+    private const string MODEL = "claude-3-sonnet-20240229";
     [SerializeField] private string apiKey;
-
-    [SerializeField] ResposneClaude claudeResponse;
 
     [System.Serializable]
     private class RequestBody
     {
         public string model;
         public int max_tokens;
-        public Message[] messages;
+        public List<Message> messages;
     }
 
     [System.Serializable]
@@ -57,13 +54,18 @@ public class AnthropicAPIClient : MonoBehaviour
         public string content;
     }
 
-    public async Task<ResposneClaude> SendMessageAsync(string userMessage)
+    public void SendMessage(string userMessage, Action<ResponseClaude> onComplete, Action<string> onError)
+    {
+        StartCoroutine(SendMessageCoroutine(userMessage, onComplete, onError));
+    }
+
+    private IEnumerator SendMessageCoroutine(string userMessage, Action<ResponseClaude> onComplete, Action<string> onError)
     {
         RequestBody requestBody = new RequestBody
         {
             model = MODEL,
             max_tokens = 1024,
-            messages = new Message[]
+            messages = new List<Message>
             {
                 new Message { role = "user", content = userMessage }
             }
@@ -76,35 +78,22 @@ public class AnthropicAPIClient : MonoBehaviour
             byte[] bodyRaw = Encoding.UTF8.GetBytes(jsonBody);
             request.uploadHandler = new UploadHandlerRaw(bodyRaw);
             request.downloadHandler = new DownloadHandlerBuffer();
-
             request.SetRequestHeader("x-api-key", apiKey);
             request.SetRequestHeader("anthropic-version", API_VERSION);
             request.SetRequestHeader("content-type", "application/json");
 
-            try
+            yield return request.SendWebRequest();
+
+            if (request.result == UnityWebRequest.Result.Success)
             {
-                UnityWebRequestAsyncOperation operation = request.SendWebRequest();
-                while (!operation.isDone)
-                {
-                    await Task.Yield();
-                }
-
-                if (request.result == UnityWebRequest.Result.Success)
-                {
-                    claudeResponse = JsonUtility.FromJson<ResposneClaude>(request.downloadHandler.text);
-
-                    return claudeResponse;
-                }
-                else
-                {
-                    Debug.LogError($"Error: {request.error}");
-                    return null;
-                }
+                ResponseClaude response = JsonUtility.FromJson<ResponseClaude>(request.downloadHandler.text);
+                onComplete?.Invoke(response);
             }
-            catch (Exception e)
+            else
             {
-                Debug.LogError($"Exception: {e.Message}");
-                return null;
+                string errorMessage = $"Error: {request.error}";
+                Debug.LogError(errorMessage);
+                onError?.Invoke(errorMessage);
             }
         }
     }
